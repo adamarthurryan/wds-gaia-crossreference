@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wds-gaia-crossreference"
+version = "0.1.0"
+description = "Cross-reference Washington Double Star Catalog with Gaia DR3"
+requires-python = ">=3.10"
+dependencies = [
+    "astropy",
+    "astroquery",
+    "wds-astropy-table",
+]
+
+[project.scripts]
+xref = "xref.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["xref*"]

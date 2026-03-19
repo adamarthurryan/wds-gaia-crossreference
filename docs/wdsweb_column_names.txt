@@ -1,0 +1,22 @@
+wdsweb_columns = [
+    (1,10,'s','id'),             #           2000 Coordinates
+    (11,17,'s','discoverer'),    #           Discoverer & Number
+    (18,22,'s','components'),    #           Components
+    (24,27,'i','first_date'),    #           Date (first)
+    (29,32,'i','last_date'),     #           Date (last)
+    (34,37,'i','num_obs'),       #           Number of Observations (up to 9999)
+    (39,41,'i','first_pa'),      #           Position Angle (first - XXX)
+    (43,45,'i','last_pa'),       #           Position Angle (last  - XXX)
+    (47,51,'f','first_sep'),     #         Separation (first)
+    (53,57,'f','last_sep'),      #         Separation (last)
+    (59,63,'f','pri_mag'),       #         Magnitude of First Component
+    (65,69,'f','sec_mag'),       #         Magnitude of Second Component
+    (71,79,'s','spectral'),      #         Spectral Type (Primary/Secondary)
+    (81,84,'i','pri_pm_ra'),     #         Primary Proper Motion (RA)
+    (85,88,'i','pri_pm_dec'),    #         Primary Proper Motion (Dec)
+    (90,93,'i','sec_pm_ra'),     #         Secondary Proper Motion (RA)
+    (94,97,'i','sec_pm_dec'),    #         Secondary Proper Motion (Dec)
+    (99,106,'s','dm'),           #         Durchmusterung Number
+    (108,111,'s','notes'),       #         Notes
+    (113,130,'s','j2000'),       #        2000 arcsecond coordinates
+]
