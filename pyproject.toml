@@ -10,6 +10,7 @@ requires-python = ">=3.10"
 dependencies = [
     "astropy",
     "astroquery",
+    "matplotlib",
     "wds-astropy-table",
 ]
 

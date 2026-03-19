@@ -1,6 +1,5 @@
 """Coordinate utilities for WDS/Gaia cross-reference."""
 
-import math
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 
@@ -45,23 +44,11 @@ def component_coords(record) -> dict:
     """
     primary = primary_coord(record)
 
-    pa_deg = float(record["pa2"]) if "pa2" in record.colnames else float(record[6])
-    sep_arcsec = float(record["sep2"]) if "sep2" in record.colnames else float(record[8])
+    pa_deg = float(record["last_pa"])
+    sep_arcsec = float(record["last_sep"])
 
     # Derive secondary position: offset from primary along PA
-    # PA is measured east of north
-    pa_rad = math.radians(pa_deg)
-    delta_dec = sep_arcsec * math.cos(pa_rad) / 3600.0
-    delta_ra = (
-        sep_arcsec * math.sin(pa_rad)
-        / math.cos(math.radians(primary.dec.deg))
-        / 3600.0
-    )
-
-    secondary = SkyCoord(
-        ra=(primary.ra.deg + delta_ra) * u.deg,
-        dec=(primary.dec.deg + delta_dec) * u.deg,
-        frame="icrs",
-    )
+    # PA is measured east of north; directional_offset_by handles spherical geometry
+    secondary = primary.directional_offset_by(pa_deg * u.deg, sep_arcsec * u.arcsec)
 
     return {"A": primary, "B": secondary}

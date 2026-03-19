@@ -7,6 +7,7 @@ from xref.wds import load_wds, lookup_wds
 from xref.coordinates import component_coords
 from xref.gaia import cone_search
 from xref.display import print_results
+from xref.image import plot_field
 
 
 def main():
@@ -22,6 +23,15 @@ def main():
         default="AB",
         help="Two-character components code (default: AB)",
     )
+    parser.add_argument(
+        "--image",
+        metavar="FILE",
+        nargs="?",
+        const="",
+        default=None,
+        help="Download and display a DSS field image with overlays. "
+             "Optionally provide a file path to save instead of displaying.",
+    )
     args = parser.parse_args()
 
     wds_table = load_wds()
@@ -30,19 +40,17 @@ def main():
         print(f"No WDS record found for {args.identifier!r} {args.components}")
         sys.exit(1)
 
-    print(f"WDS record found: {record}")
-
     coords = component_coords(record)
-    
-    print(f"Calculated coordinates: {coords}")
 
     results = {}
     for label, coord in coords.items():
         results[label] = cone_search(coord)
 
-    print(f"Results: {results}")
-    
     print_results(record, coords, results)
+
+    if args.image is not None:
+        output = args.image if args.image else None
+        plot_field(record, coords, results, output=output)
 
 
 if __name__ == "__main__":
