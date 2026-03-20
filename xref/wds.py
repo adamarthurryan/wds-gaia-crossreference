@@ -21,8 +21,9 @@ def lookup_wds(table, identifier: str, components: str = "AB"):
       - an observer code + number string (e.g. 'STF 24')
     """
     
-    identifier = identifier.strip()
-    identifier = identifier.replace(' ', '')
+    identifier = identifier.strip().upper().replace(' ', '')
+    components = components.upper()
+
     mask = None
 
     # identifier is a 10-character WDS ID
@@ -43,7 +44,7 @@ def lookup_wds(table, identifier: str, components: str = "AB"):
     if (components == 'AB'):
         comp_ab = True
 
-    comp_mask = (candidates['components'] == components) or (comp_ab and (candidates['components']==""))
+    comp_mask = ((candidates['components'] == components) | (comp_ab and (candidates['components']=="")))
     matched = candidates[comp_mask]
     
     if len(matched) == 0 :

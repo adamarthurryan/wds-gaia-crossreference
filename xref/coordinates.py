@@ -2,39 +2,41 @@
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord
+from astropy.time import Time
+
+def parse_coord_j2000_string(s) -> SkyCoord:
+    """Parse the arcsecond-precision 2000 coordinate from a WDS record.
+    Format HHMMSSs.s+DDMMSS
+    """
+
+    rs = s[:9]
+    ds = s[9:]
+
+    formatted_coord_string = rs[0:2]+'h'+rs[2:4]+'m'+rs[4:]+'s' + ' ' + ds[0:3]+'d'+ds[3:5]+'m'+ds[5:]+'s'
+    return SkyCoord(formatted_coord_string, unit=(u.hourangle, u.deg), obstime=Time('J2000.0'))
+
+def parse_coord_id_string(s) -> SkyCoord:
+    """Parse the arcminute-precision coordinate from a WDS identifier string.
+    Format HHMMm+/-DDmm where the trailing digit is tenths of arcminutes.
+    """
+
+    rs = s[:5]   # HHMMm
+    ds = s[5:]   # +/-DDmm
+
+    formatted_coord_string = rs[0:2]+'h'+rs[2:]+'m ' + ds[0:3]+'d'+ds[3:]+'m'
+    return SkyCoord(formatted_coord_string, unit=(u.hourangle, u.deg))
 
 
 def primary_coord(record) -> SkyCoord:
     """Parse the arcsecond-precision 2000 coordinate from a WDS record."""
-    # Column 113-130: 'RA Hdec' format, e.g. '001347.8+454933'
-    coord_str = str(record["j2000"]).strip() if "j2000" in record.colnames else None
-
+    
+    coord_str = str(record["j2000"]) if "j2000" in record.colnames else None
+ 
     if coord_str and len(coord_str) >= 15:
-        ra_str = coord_str[:9]   # HHMMSSs.s
-        dec_str = coord_str[9:]  # +DDMMSS
-        ra_h = int(ra_str[0:2])
-        ra_m = int(ra_str[2:4])
-        ra_s = float(ra_str[4:])
-        sign = -1 if dec_str[0] == "-" else 1
-        dec_d = int(dec_str[1:3])
-        dec_m = int(dec_str[3:5])
-        dec_s = int(dec_str[5:7])
-        ra_deg = 15 * (ra_h + ra_m / 60 + ra_s / 3600)
-        dec_deg = sign * (dec_d + dec_m / 60 + dec_s / 3600)
-        return SkyCoord(ra=ra_deg * u.deg, dec=dec_deg * u.deg, frame="icrs")
+        return parse_coord_j2000_string(coord_str)
 
-    # Fall back to arcminute coordinate (WDS id)
-    wds_id = str(record["id"]).strip()
-    ra_hm = wds_id[:5]   # HHMMm
-    dec_dm = wds_id[5:]  # +/-DDmm
-    ra_h = int(ra_hm[0:2])
-    ra_m = float(ra_hm[2:]) / 10
-    sign = -1 if dec_dm[0] == "-" else 1
-    dec_d = int(dec_dm[1:3])
-    dec_m = float(dec_dm[3:]) / 10
-    ra_deg = 15 * (ra_h + ra_m / 60)
-    dec_deg = sign * (dec_d + dec_m / 60)
-    return SkyCoord(ra=ra_deg * u.deg, dec=dec_deg * u.deg, frame="icrs")
+    else:
+        return parse_coord_id_string(record['id'])
 
 
 def component_coords(record) -> dict:
