@@ -8,6 +8,7 @@ from xref.coordinates import component_coords
 from xref.gaia import cone_search
 from xref.display import print_results
 from xref.image import plot_field
+from xref import cache
 
 
 def main():
@@ -34,17 +35,27 @@ def main():
     )
     args = parser.parse_args()
 
-    wds_table = load_wds()
-    record = lookup_wds(wds_table, args.identifier, args.components)
-    if record is None:
-        print(f"No WDS record found for {args.identifier!r} {args.components}")
-        sys.exit(1)
+    identifier = args.identifier.strip().upper().replace(' ', '')
+    components = args.components.upper()
 
-    coords = component_coords(record)
+    cached = cache.load(identifier, components)
+    if cached is not None:
+        print("(loaded from cache)")
+        record, coords, results = cached
+    else:
+        wds_table = load_wds()
+        record = lookup_wds(wds_table, args.identifier, args.components)
+        if record is None:
+            print(f"No WDS record found for {args.identifier!r} {args.components}")
+            sys.exit(1)
 
-    results = {}
-    for label, coord in coords.items():
-        results[label] = cone_search(coord)
+        coords = component_coords(record)
+
+        results = {}
+        for label, coord in coords.items():
+            results[label] = cone_search(coord)
+
+        cache.save(args.identifier, args.components, record, coords, results)
 
     print_results(record, coords, results)
 

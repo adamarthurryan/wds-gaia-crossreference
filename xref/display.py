@@ -1,6 +1,7 @@
 """Output formatting for WDS/Gaia cross-reference results."""
 
 import astropy.units as u
+from xref.coordinates import gaia_coords_j2000
 
 
 def print_results(record, coords, gaia_results: dict):
@@ -26,14 +27,8 @@ def print_results(record, coords, gaia_results: dict):
             print("  No Gaia sources found.\n")
             continue
 
-        # Compute angular separations
-        from astropy.coordinates import SkyCoord
-        gaia_coords = SkyCoord(
-            ra=sources["ra"],
-            dec=sources["dec"],
-            unit=u.deg,
-            frame="icrs",
-        )
+        # Compute angular separations — propagate Gaia J2016 → J2000 to match WDS epoch
+        gaia_coords = gaia_coords_j2000(sources)
         seps = coord.separation(gaia_coords).to(u.arcsec)
 
         print(f"  {'#':>3}  {'source_id':>20}  {'sep(arcsec)':>12}  {'g_mag':>6}  {'delta_mag':>9}  {'teff_gspphot':>12}")

@@ -7,6 +7,7 @@ from astropy.wcs import WCS
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from astroquery.skyview import SkyView
+from xref.coordinates import gaia_coords_j2000
 
 
 def plot_field(record, coords, gaia_results, fov=None, output=None):
@@ -75,15 +76,15 @@ def plot_field(record, coords, gaia_results, fov=None, output=None):
         )
 
     # Overlay Gaia source positions (circles, numbered 1 2 3 … per component)
+    # Gaia positions are propagated J2016→J2000 to be consistent with WDS epoch.
     for label, sources in gaia_results.items():
         if sources is None or len(sources) == 0:
             continue
         comp_coord = coords[label]
-        gaia_coords = SkyCoord(ra=sources["ra"], dec=sources["dec"], unit=u.deg)
-        seps = comp_coord.separation(gaia_coords).to(u.arcsec)
-        sorted_pairs = sorted(zip(sources, seps), key=lambda x: x[1])
-        for i, (src, _) in enumerate(sorted_pairs, 1):
-            src_coord = SkyCoord(ra=src["ra"], dec=src["dec"], unit=u.deg)
+        propagated = gaia_coords_j2000(sources)
+        seps = comp_coord.separation(propagated).to(u.arcsec)
+        sorted_pairs = sorted(zip(propagated, seps), key=lambda x: x[1])
+        for i, (src_coord, _) in enumerate(sorted_pairs, 1):
             px, py = wcs.all_world2pix([[src_coord.ra.deg, src_coord.dec.deg]], 0)[0]
             ax.plot(px, py, marker="o", ms=12, mfc="none", mec="yellow", mew=1.5, zorder=3)
             ax.annotate(
