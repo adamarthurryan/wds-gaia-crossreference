@@ -10,7 +10,6 @@ from xref.display import print_results
 from xref.image import plot_field
 from xref import cache
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="Cross-reference WDS double star system with Gaia DR3"
@@ -58,6 +57,8 @@ def main():
         cache.save(args.identifier, args.components, record, coords, results)
 
     print_results(record, coords, results)
+
+
 
     if args.image is not None:
         output = args.image if args.image else None
